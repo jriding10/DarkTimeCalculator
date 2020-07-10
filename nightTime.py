@@ -10,6 +10,7 @@
 
 import utilities as util
 import julianDate as jdt
+import math as m
 from astropy.time import Time
 
 class NightInfo:
@@ -44,11 +45,11 @@ class NightInfo:
     def getMoonTimes(self):
         self.moonRise = self.obs.moon_rise_time(self.time)
         self.moonSet = self.obs.moon_set_time(self.time, which = 'next')
-        moonPhase = self.obs.moon_phase(time)
+        moonPhase = self.obs.moon_phase(self.time)
         self.moonFraction = moonPhase/360.0
 
 # determines the length of night time in (hours, minutes, seconds)
-    def nightTime(start, end):
+    def nightTime(self, start, end):
         diffJD = end.jd - start.jd
         hour = jdt.JDTime(diffJD, 24)
         hour.jdConversion()
@@ -69,15 +70,15 @@ class NightInfo:
         self.julianDate = Time(timeAndDate)
          
     def moonUp(self):
-        if self.moonRise.jd > self.astronomicalEnd.jd:
-            moonArose = self.astronomicalEnd.jd
+        if self.moonRise.jd > self.astroEnd.jd:
+            moonArose = self.astroEnd.jd
         else:
-            moonArose = max(self.moonRise.jd, self.astronomicalStart.jd)
+            moonArose = max(self.moonRise.jd, self.astroStart.jd)
 
-        if self.moonSet < self.astronomicalStart.jd:
-            moonAslept = self.astronomicalEnd.jd
+        if self.moonSet < self.astroStart.jd:
+            moonAslept = self.astroEnd.jd
         else:
-            moonAslept = min(self.moonSet.jd, self.astronomicalEnd.jd)
+            moonAslept = min(self.moonSet.jd, self.astroEnd.jd)
 
         moonArose = Time(moonArose, format='jd')
         moonAslept = Time(moonAslept, format='jd')

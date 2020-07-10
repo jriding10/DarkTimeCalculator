@@ -41,8 +41,8 @@ imp.reload(util)
 imp.reload(nt)
 
 # run the next two lines occassionally for the most up-to-date rise/set times
-# from astroplan import download_IERS_A   # Best precision data (arcseconds)
-# download_IERS_A()
+from astroplan import download_IERS_A   # Best precision data (arcseconds)
+download_IERS_A()
 
 # Location of the AAT according to the Observer's Guide 1991
 # longitude = 149deg 3min 58sec E
@@ -88,24 +88,27 @@ thisMonth.createDate()
 dates = thisMonth.dates
 
 CH = [0.0] * thisMonth.numDaysInMonth
+dict = {}
 
 i = 0
 while i < thisMonth.numDaysInMonth:
     # Create date object
     julianTime = util.convertJD(dates[i], midnight)
-    dates[i] = nt.NightInfo(aat, dates[i], julianTime)
+    dict[i] = nt.NightInfo(aat, dates[i], julianTime)
 
-    dates[i].getAstroTimes()
-    dates[i].getNauticalTimes()
-    dates[i].getMoonTimes()
+    dict[i].getAstroTimes()
+    dict[i].getNauticalTimes()
+    dict[i].getMoonTimes()
 
-    astroStart = dates[i].astronomicalStart.ymdhms
-    astroEnd = dates[i].astronomicalEnd.ymdhms
-    moonStart = dates[i].moonRise.ymdhms
-    moonEnd = dates[i].moonSet.ymdhms
+    astroStart = dict[i].astroStart.ymdhms
+    astroEnd = dict[i].astroEnd.ymdhms
+    moonStart = dict[i].moonRise.ymdhms
+    moonEnd = dict[i].moonSet.ymdhms
+   
+    print(dict[i].astroLength)
+
+    dict[i].moonUp()
     
-    dates[i].moonUp()
-    
-    dates[i].calculateChiaroscuro()
+    dict[i].calculateChiaroscuro()
 
-    CH[i] = dates[i].chiaroscuro 
+    CH[i] = dict[i].chiaroscuro 
