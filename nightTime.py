@@ -10,8 +10,11 @@
 
 import utilities as util
 import julianDate as jdt
+import importlib as imp
 import math as m
 from astropy.time import Time
+
+imp.reload(jdt)
 
 class NightInfo:
     def __init__(self, observatory, date, jDate):
@@ -33,17 +36,17 @@ class NightInfo:
         self.chiaroscuro = 0.0
 
     def getAstroTimes(self):
-        self.astroStart = self.obs.twilight_evening_astronomical(self.time)
-        self.astroEnd = self.obs.twilight_morning_astronomical(self.time)
+        self.astroStart = self.obs.twilight_evening_astronomical(self.time, which='next')
+        self.astroEnd = self.obs.twilight_morning_astronomical(self.time, which='next')
         self.astroLength = self.nightTime(self.astroStart, self.astroEnd)
         
     def getNauticalTimes(self):
-        self.nauticalStart = self.obs.twilight_evening_nautical(self.time)
-        self.nauticalEnd = self.obs.twilight_morning_nautical(self.time)
+        self.nauticalStart = self.obs.twilight_evening_nautical(self.time, which='next')
+        self.nauticalEnd = self.obs.twilight_morning_nautical(self.time, which='next')
         self.nauticalLength = self.nightTime(self.nauticalStart, self.nauticalEnd)
 
     def getMoonTimes(self):
-        self.moonRise = self.obs.moon_rise_time(self.time)
+        self.moonRise = self.obs.moon_rise_time(self.time, which = 'next')
         self.moonSet = self.obs.moon_set_time(self.time, which = 'next')
         moonPhase = self.obs.moon_phase(self.time)
         self.moonFraction = moonPhase/360.0
@@ -70,16 +73,21 @@ class NightInfo:
         self.julianDate = Time(timeAndDate)
          
     def moonUp(self):
-        if self.moonRise.jd > self.astroEnd.jd:
-            moonArose = self.astroEnd.jd
-        else:
-            moonArose = max(self.moonRise.jd, self.astroStart.jd)
-
-        if self.moonSet < self.astroStart.jd:
+        moonArose = max(self.moonRise.jd, self.astroStart.jd)
+        moonAslept = min(self.moonSet.jd, self.astroEnd.jd)
+        
+        if self.moonSet.jd < self.astroStart.jd:
             moonAslept = self.astroEnd.jd
-        else:
-            moonAslept = min(self.moonSet.jd, self.astroEnd.jd)
-
+            
+        if moonArose > self.astroEnd.jd:
+            moonArose = self.astroEnd.jd
+            
+        if moonAslept - moonArose < 0:
+            if moonArose < self.astroEnd.jd:
+                moonAslept += self.astroEnd.jd - moonArose
+            else:  
+                moonArose = self.astroStart.jd
+            
         moonArose = Time(moonArose, format='jd')
         moonAslept = Time(moonAslept, format='jd')
 
@@ -88,7 +96,7 @@ class NightInfo:
     def calculateChiaroscuro(self):
         moonLengthInHours = util.convertToHours(self.moonUpDuringNight)
         astroLengthInHours = util.convertToHours(self.astroLength)
-        naticalLengthInHours = util.convertToHours(self.nauticalLength)
+        nauticalLengthInHours = util.convertToHours(self.nauticalLength)
 
         timeWOMoon = astroLengthInHours - moonLengthInHours
         

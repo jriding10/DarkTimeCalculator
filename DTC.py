@@ -34,15 +34,15 @@ import dateAndTime as dnt
 
 from astropy.time import Time
 import sys
-import imp
+import importlib as imp
 
 imp.reload(dnt)
 imp.reload(util)
 imp.reload(nt)
 
 # run the next two lines occassionally for the most up-to-date rise/set times
-from astroplan import download_IERS_A   # Best precision data (arcseconds)
-download_IERS_A()
+# from astroplan import download_IERS_A   # Best precision data (arcseconds)
+# download_IERS_A()
 
 # Location of the AAT according to the Observer's Guide 1991
 # longitude = 149deg 3min 58sec E
@@ -60,7 +60,7 @@ aat = util.createObservatory2(siteName)
 # aest = utc + 10hours, so the variable time is set to local midnight the day before.
 # aest = 6pm -> 8am utc (the previous day)
 # aest = 6am -> 8pm utc (the previous day)
-midnight = ' 14:00:00'
+midnight = ' 2:00:00'
 
 # Obtain user input
 year = 0
@@ -112,3 +112,4 @@ while i < thisMonth.numDaysInMonth:
     dict[i].calculateChiaroscuro()
 
     CH[i] = dict[i].chiaroscuro 
+    i+=1

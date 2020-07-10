@@ -8,6 +8,7 @@
 # python version 3.7
 # astropy
 
+import math as m
 from astropy.time import Time
 
 # Converts jd time into (hours, minutes, seconds)
