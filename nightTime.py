@@ -23,7 +23,6 @@ class NightInfo:
         self.date = date
         self.time = jDate
         self.midnight = ' 2:00:00.0'
-        self.julianDate = 0.0
         self.astroStart = 0.0
         self.astroEnd = 0.0
         self.astroLength = 0.0
@@ -126,8 +125,8 @@ class NightInfo:
             print("CH is too small!")        
 
 class FirstHalf(NightInfo):
-    def __init__(self):
-        self.astroEnd = 0.0
+    def __init__(self, obs, date, jDate):
+        self.astroEnd = NightInfo(self, obs, date, jDate).time
         self.astroLength = 0.0
         self.nauticalEnd = 0.0
         self.nauticalLength = 0.0
@@ -135,10 +134,10 @@ class FirstHalf(NightInfo):
         self.chiaroscuro = 0.0
 
     def getAstroTimes(self):
-        self.astroEnd = self.midnight
+        self.astroEnd = NightInfo(obs, date, jDate).time
 
     def getNauticalTime(self):
-        self.nauticalEnd = self.mightnight
+        self.nauticalEnd = NightInfo(obs, date, jDate).time
 
 class SecondHalf(NightInfo):
     def __init__(self):
@@ -150,7 +149,7 @@ class SecondHalf(NightInfo):
         self.chiaroscuro = 0.0
 
     def getAstroTimes(self):
-        self.astroStart = self.midnight
+        self.astroStart = NightTime.time
 
     def getNauticalTime(self):
-        self.nauticalStart = self.mightnight
+        self.nauticalStart = NightTime.time

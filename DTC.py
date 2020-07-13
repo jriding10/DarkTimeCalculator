@@ -94,29 +94,47 @@ filename = monthName + '_' + str(year) + '.csv'
 CH = [0.0] * thisMonth.numDaysInMonth
 dark = [0.0] * thisMonth.numDaysInMonth
 grey = [0.0] * thisMonth.numDaysInMonth
-dict = {}
+night = {}
+firstHalf = {}
+secondHalf = {}
 
 i = 0
 while i < thisMonth.numDaysInMonth:
     # Create date object
     julianTime = util.convertJD(dates[i], midnight)
-    dict[i] = nt.NightInfo(aat, dates[i], julianTime)
+    night[i] = nt.NightInfo(aat, dates[i], julianTime)
+#    firstHalf[i] = nt.FirstHalf(aat, dates[i], julianTime)
+#    secondHalf[i] = nt.SecondHalf()
 
-    dict[i].getAstroTimes()
-    dict[i].getNauticalTimes()
-    dict[i].getNightLengths()
-    dict[i].getMoonTimes()
+    night[i].getAstroTimes()
+    night[i].getNauticalTimes()
+    night[i].getNightLengths()
+    night[i].getMoonTimes()
 
-    astroStart = dict[i].astroStart.ymdhms
-    astroEnd = dict[i].astroEnd.ymdhms
-    moonStart = dict[i].moonRise.ymdhms
-    moonEnd = dict[i].moonSet.ymdhms
-   
-    dict[i].moonUp()
+#    firstHalf[i].getAstroTimes()
+#    firstHalf[i].getNauticalTimes()
+#    firstHalf[i].getNightLengths()
+#    firstHalf[i].getMoonTimes()
+
+#    secondHalf[i].getAstroTimes()
+#    secondHalf[i].getNauticalTimes()
+#    secondHalf[i].getNightLengths()
+#    secondHalf[i].getMoonTimes()
     
-    dict[i].calculateChiaroscuro()
+    astroStart = night[i].astroStart.ymdhms
+    astroEnd = night[i].astroEnd.ymdhms
+    moonStart = night[i].moonRise.ymdhms
+    moonEnd = night[i].moonSet.ymdhms
+   
+    night[i].moonUp()
+#    firstHalf[i].moonUp()
+#    secondHalf[i].moonUp()
+    
+    night[i].calculateChiaroscuro()
+#    firstHalf[i].calculateChiaroscuro()
+#    secondHalf[i].calculateChiaroscuro()
 
-    CH[i] = dict[i].chiaroscuro 
+    CH[i] = day[i].chiaroscuro 
     dark[i] = 0.65
     grey[i] = 0.35
     
