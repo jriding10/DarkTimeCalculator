@@ -35,7 +35,6 @@ import dateAndTime as dnt
 import csv
 from astropy.time import Time
 import importlib as imp
-import matplotlib.pyplot as plt
 
 imp.reload(dnt)
 imp.reload(util)
@@ -61,7 +60,8 @@ aat = util.createObservatory2(siteName)
 # aest = utc + 10hours, so the variable time is set to local midnight the day before.
 # aest = 6pm -> 8am utc (the previous day)
 # aest = 6am -> 8pm utc (the previous day)
-midnight = ' 2:00:00'
+midday = ' 2:00:00'
+midnight = ' 14:00:00'
 
 # Obtain user input
 year = 0
@@ -82,6 +82,15 @@ while month > 12 or month < -1:
         print("Invalid month. Please enter an integer")
         month = 13
 
+fraction = 4
+while fraction < 0 or fraction > 3:
+    fraction = input("Do you want the chiaroscuro for the whole night (0), first half (1), second half (2) or all (3)?")
+    try:
+        fraction = int(fraction)
+    except ValueError:
+        print("Invalid choice. Pls try again.")
+        fraction = 5
+
 #################################################################################### 
 thisMonth = dnt.Dates(month, year)
 thisMonth.numDaysInMonth = thisMonth.numberOfDaysInMonth(month)
@@ -95,46 +104,59 @@ CH = [0.0] * thisMonth.numDaysInMonth
 dark = [0.0] * thisMonth.numDaysInMonth
 grey = [0.0] * thisMonth.numDaysInMonth
 night = {}
-firstHalf = {}
-secondHalf = {}
+
+if fraction == 1 or fraction == 3:
+    firstCH = [0.0] * thisMonth.numDaysInMonth
+    firstHalf = {}
+if fraction == 2 or fraction == 3:
+    secondCH = [0.0] * thisMonth.numDaysInMonth
+    secondHalf = {}
 
 i = 0
 while i < thisMonth.numDaysInMonth:
     # Create date object
-    julianTime = util.convertJD(dates[i], midnight)
-    night[i] = nt.NightInfo(aat, dates[i], julianTime)
-#    firstHalf[i] = nt.FirstHalf(aat, dates[i], julianTime)
-#    secondHalf[i] = nt.SecondHalf()
+    middayJD = util.convertJD(dates[i], midday)
+    midnightJD = util.convertJD(dates[i], midnight)
+    night[i] = nt.NightInfo(aat, dates[i], middayJD)
 
     night[i].getAstroTimes()
     night[i].getNauticalTimes()
     night[i].getNightLengths()
     night[i].getMoonTimes()
+    night[i].moonUp()
+    night[i].calculateChiaroscuro()
 
-#    firstHalf[i].getAstroTimes()
-#    firstHalf[i].getNauticalTimes()
-#    firstHalf[i].getNightLengths()
-#    firstHalf[i].getMoonTimes()
+    if fraction == 1 or fraction == 3:
+        firstHalf[i] = nt.NightInfo(aat, dates[i], middayJD)
+        firstHalf[i].getAstroTimes()
+        firstHalf[i].getNauticalTimes()
+        firstHalf[i].astroEnd = midnightJD
+        firstHalf[i].nauticalEnd = midnightJD
+        firstHalf[i].getNightLengths()
+        firstHalf[i].getMoonTimes()
+        firstHalf[i].moonUp()
+        firstHalf[i].calculateChiaroscuro()
+        firstCH[i] = firstHalf[i].chiaroscuro
 
-#    secondHalf[i].getAstroTimes()
-#    secondHalf[i].getNauticalTimes()
-#    secondHalf[i].getNightLengths()
-#    secondHalf[i].getMoonTimes()
+
+    if fraction == 2 or fraction == 3:
+        secondHalf[i] = nt.NightInfo(aat, dates[i], middayJD)
+        secondHalf[i].getAstroTimes()
+        secondHalf[i].getNauticalTimes()
+        secondHalf[i].astroStart = midnightJD
+        secondHalf[i].nauticalStart = midnightJD
+        secondHalf[i].getNightLengths()
+        secondHalf[i].getMoonTimes()
+        secondHalf[i].moonUp()
+        secondHalf[i].calculateChiaroscuro()
+        secondCH[i] = secondHalf[i].chiaroscuro 
     
     astroStart = night[i].astroStart.ymdhms
     astroEnd = night[i].astroEnd.ymdhms
     moonStart = night[i].moonRise.ymdhms
     moonEnd = night[i].moonSet.ymdhms
    
-    night[i].moonUp()
-#    firstHalf[i].moonUp()
-#    secondHalf[i].moonUp()
-    
-    night[i].calculateChiaroscuro()
-#    firstHalf[i].calculateChiaroscuro()
-#    secondHalf[i].calculateChiaroscuro()
-
-    CH[i] = day[i].chiaroscuro 
+    CH[i] = night[i].chiaroscuro
     dark[i] = 0.65
     grey[i] = 0.35
     
@@ -146,9 +168,5 @@ while i < thisMonth.numDaysInMonth:
 #    wr = csv.writer(output, delimiter='\n')
 #    wr.writerows([CH])
 
-#plt.plot(CH)
-#plt.plot(dark)
-#plt.plot(grey)
-#plt.show()
 
 

@@ -22,7 +22,6 @@ class NightInfo:
         self.obs = observatory
         self.date = date
         self.time = jDate
-        self.midnight = ' 2:00:00.0'
         self.astroStart = 0.0
         self.astroEnd = 0.0
         self.astroLength = 0.0
@@ -70,10 +69,6 @@ class NightInfo:
     
         return hours, minutes, seconds
 
-    def createJD(self):
-        timeAndDate = self.date + self.midnight
-        self.julianDate = Time(timeAndDate)
-         
     def moonUp(self):
         # covers the basic cases where the moon rises either before or after
         # the start of astro twilight. Similar, when it either sets before or
@@ -124,32 +119,35 @@ class NightInfo:
             self.chiaroscuro = 0.0
             print("CH is too small!")        
 
-class FirstHalf(NightInfo):
-    def __init__(self, obs, date, jDate):
-        self.astroEnd = NightInfo(self, obs, date, jDate).time
-        self.astroLength = 0.0
-        self.nauticalEnd = 0.0
-        self.nauticalLength = 0.0
-        self.moonUpDuringNight = 0.0
-        self.chiaroscuro = 0.0
+#class FirstHalf(NightInfo):
+#    def __init__(self, obs, date, jDate):
+#        super().__init__(obs, date, jDate)
+#        self.astroEnd = jDate
+#        self.astroLength = 0.0
+#        self.nauticalEnd = jDate
+#        self.nauticalLength = 0.0
+#        self.moonUpDuringNight = 0.0
+#        self.chiaroscuro = 0.0
 
-    def getAstroTimes(self):
-        self.astroEnd = NightInfo(obs, date, jDate).time
+#    def getAT(self):
+#        self.astroStart = super().getAstroTimes()
+#        self.astroEnd = super().time
 
-    def getNauticalTime(self):
-        self.nauticalEnd = NightInfo(obs, date, jDate).time
+#    def getNT(self):
+#        self.nauticalStart = super().getNauticalTimes()
+#        self.nauticalEnd = super().time
 
-class SecondHalf(NightInfo):
-    def __init__(self):
-        self.astroStart = 0.0
-        self.astroLength = 0.0
-        self.nauticalStart = 0.0
-        self.nauticalLength = 0.0
-        self.moonUpDuringNight = 0.0
-        self.chiaroscuro = 0.0
+#class SecondHalf(NightInfo):
+#    def __init__(self):
+#        self.astroStart = 0.0
+#        self.astroLength = 0.0
+#        self.nauticalStart = 0.0
+#        self.nauticalLength = 0.0
+#        self.moonUpDuringNight = 0.0
+#        self.chiaroscuro = 0.0
 
-    def getAstroTimes(self):
-        self.astroStart = NightTime.time
+#    def getAstroTimes(self):
+#        self.astroStart = NightTime.time
 
-    def getNauticalTime(self):
-        self.nauticalStart = NightTime.time
+#    def getNauticalTime(self):
+#        self.nauticalStart = NightTime.time

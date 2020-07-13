@@ -11,6 +11,7 @@
 import math as m
 import numpy as np
 import astropy.units as u
+import matplotlib.pyplot as plt
 from astropy.time import Time
 from astroplan import Observer
 from astropy.coordinates import EarthLocation
@@ -71,3 +72,14 @@ def createStaticVarList(var, length):
     lst = [var] * length
     return lst
 
+def createPlot(x, y, z):
+    length = len(x)
+    grey = createStaticVarList(0.35, length)
+    dark = createStaticVarList(0.65, length)
+
+    plt.plot(x, 'k')
+    plt.plot(y, 'b*')
+    plt.plot(z, 'r*')
+    plt.plot(grey, 'k--')
+    plt.plot(dark, 'k--')
+    plt.show()
