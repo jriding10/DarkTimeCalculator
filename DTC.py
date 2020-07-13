@@ -92,6 +92,8 @@ monthName = thisMonth.getMonthName()
 filename = monthName + '_' + str(year) + '.csv'
 
 CH = [0.0] * thisMonth.numDaysInMonth
+dark = [0.0] * thisMonth.numDaysInMonth
+grey = [0.0] * thisMonth.numDaysInMonth
 dict = {}
 
 i = 0
@@ -110,18 +112,25 @@ while i < thisMonth.numDaysInMonth:
     moonStart = dict[i].moonRise.ymdhms
     moonEnd = dict[i].moonSet.ymdhms
    
-    print(dict[i].date)
-
     dict[i].moonUp()
     
     dict[i].calculateChiaroscuro()
 
     CH[i] = dict[i].chiaroscuro 
+    dark[i] = 0.65
+    grey[i] = 0.35
+    
+    print(CH[i])
     i+=1
 
-#writer = csv.writer(open(filename, 'wb'))
-#writer.writerows(CH)
-plt.plot(CH)
-plt.show()
+    
+#with open(filename, 'a+') as output:
+#    wr = csv.writer(output, delimiter='\n')
+#    wr.writerows([CH])
+
+#plt.plot(CH)
+#plt.plot(dark)
+#plt.plot(grey)
+#plt.show()
 
 

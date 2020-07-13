@@ -16,7 +16,6 @@ class Dates:
         self.month = month
         self.year = year
         self.numDaysInMonth = 31
-        self.numDaysLastMonth = 0
         self.dates = [0] * 31
 
     def getMonthName(self):
@@ -55,26 +54,14 @@ class Dates:
         return numDaysThisMonth
 
     def createDate(self):
-        days = list(range(1, self.numDaysInMonth))
-        months = [self.month] * self.numDaysInMonth
-        years = [self.year] * self.numDaysInMonth
+        numDays = self.numDaysInMonth + 1
+        days = list(range(1, numDays))
+        months = [self.month] * numDays
+        years = [self.year] * numDays
         
-        if self.month == 1:
-            lastMonth = 12
-            lastYear = self.year - 1
-            self.numDaysLastMonth = 31
-        else:
-            lastMonth = self.month - 1
-            lastYear = self.year
-            self.numDaysLastMonth = self.numberOfDaysInMonth(lastMonth)
-        
-        days.insert(0, self.numDaysLastMonth)
-        months.insert(0, lastMonth)
-        years.insert(0, lastYear)
-    
-        self.dates = [None] * self.numDaysInMonth
+        self.dates = [None] * numDays
         i = 0
-        while i < self.numDaysInMonth:
+        while i < numDays-1:
             self.dates[i] = str(years[i]) + '-' + str(months[i]) + '-' + str(days[i])
             i+=1
 

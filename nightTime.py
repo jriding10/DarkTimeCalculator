@@ -46,7 +46,7 @@ class NightInfo:
 
     def getMoonTimes(self):
         self.moonRise = self.obs.moon_rise_time(self.time, which = 'next', horizon = -1.75*u.deg)
-        self.moonSet = self.obs.moon_set_time(self.time, which = 'next', horizon = 1.75*u.deg)
+        self.moonSet = self.obs.moon_set_time(self.time, which = 'next', horizon = -1.75*u.deg)
         moonPhase = self.obs.moon_phase(self.time)
         self.moonFraction = moonPhase/360.0
 
