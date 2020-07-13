@@ -12,6 +12,7 @@ import utilities as util
 import julianDate as jdt
 import importlib as imp
 import math as m
+import astropy.units as u
 from astropy.time import Time
 
 imp.reload(jdt)
@@ -21,7 +22,7 @@ class NightInfo:
         self.obs = observatory
         self.date = date
         self.time = jDate
-        self.midnight = ' 14:00:00.0'
+        self.midnight = ' 2:00:00.0'
         self.julianDate = 0.0
         self.astroStart = 0.0
         self.astroEnd = 0.0
@@ -38,18 +39,20 @@ class NightInfo:
     def getAstroTimes(self):
         self.astroStart = self.obs.twilight_evening_astronomical(self.time, which='next')
         self.astroEnd = self.obs.twilight_morning_astronomical(self.time, which='next')
-        self.astroLength = self.nightTime(self.astroStart, self.astroEnd)
         
     def getNauticalTimes(self):
         self.nauticalStart = self.obs.twilight_evening_nautical(self.time, which='next')
         self.nauticalEnd = self.obs.twilight_morning_nautical(self.time, which='next')
-        self.nauticalLength = self.nightTime(self.nauticalStart, self.nauticalEnd)
 
     def getMoonTimes(self):
-        self.moonRise = self.obs.moon_rise_time(self.time, which = 'next')
-        self.moonSet = self.obs.moon_set_time(self.time, which = 'next')
+        self.moonRise = self.obs.moon_rise_time(self.time, which = 'next', horizon = -1.75*u.deg)
+        self.moonSet = self.obs.moon_set_time(self.time, which = 'next', horizon = 1.75*u.deg)
         moonPhase = self.obs.moon_phase(self.time)
         self.moonFraction = moonPhase/360.0
+
+    def getNightLengths(self):
+        self.astroLength = self.nightTime(self.astroStart, self.astroEnd)
+        self.nauticalLength = self.nightTime(self.nauticalStart, self.nauticalEnd)
 
 # determines the length of night time in (hours, minutes, seconds)
     def nightTime(self, start, end):
@@ -73,15 +76,25 @@ class NightInfo:
         self.julianDate = Time(timeAndDate)
          
     def moonUp(self):
+        # covers the basic cases where the moon rises either before or after
+        # the start of astro twilight. Similar, when it either sets before or
+        # after the end of astro twilight.
         moonArose = max(self.moonRise.jd, self.astroStart.jd)
         moonAslept = min(self.moonSet.jd, self.astroEnd.jd)
         
+        # covers the case the moon sets before night time. Setting it to
+        # astroEnd ensures moonUp = astroEnd - astroEnd.
         if self.moonSet.jd < self.astroStart.jd:
             moonAslept = self.astroEnd.jd
             
+        # covers the case the moon rises after the end of astro twilight. 
+        # Setting it to astroEnd ensures moonUp = 0.
         if moonArose > self.astroEnd.jd:
             moonArose = self.astroEnd.jd
-            
+        
+        # covers the case the moon sets at the start of the night but rises
+        # again at the end. It takes the time up at the end of the night and
+        # adds it to the start to get an acturate moonUp time.    
         if moonAslept - moonArose < 0:
             if moonArose < self.astroEnd.jd:
                 moonAslept += self.astroEnd.jd - moonArose
@@ -110,4 +123,34 @@ class NightInfo:
             print("CH is too large again!")
         if self.chiaroscuro < 0.0:
             self.chiaroscuro = 0.0
-            print("CH is too small!")         
+            print("CH is too small!")        
+
+class FirstHalf(NightInfo):
+    def __init__(self):
+        self.astroEnd = 0.0
+        self.astroLength = 0.0
+        self.nauticalEnd = 0.0
+        self.nauticalLength = 0.0
+        self.moonUpDuringNight = 0.0
+        self.chiaroscuro = 0.0
+
+    def getAstroTimes(self):
+        self.astroEnd = self.midnight
+
+    def getNauticalTime(self):
+        self.nauticalEnd = self.mightnight
+
+class SecondHalf(NightInfo):
+    def __init__(self):
+        self.astroStart = 0.0
+        self.astroLength = 0.0
+        self.nauticalStart = 0.0
+        self.nauticalLength = 0.0
+        self.moonUpDuringNight = 0.0
+        self.chiaroscuro = 0.0
+
+    def getAstroTimes(self):
+        self.astroStart = self.midnight
+
+    def getNauticalTime(self):
+        self.nauticalStart = self.mightnight

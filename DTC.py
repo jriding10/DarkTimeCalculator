@@ -21,20 +21,21 @@
 # 2020-06-28    JLR     Single day version complete
 # 2020-07-07    JLR     Changed most time scenarios to JD
 #                       Implemented classes
+# 2020-07-10    JLR     Broke program into module files
 
 # Module Versions:
 # python version 3.7
-# astropy, math, astroplan
-# Utility script - DTU.py
-
+# nightTime.py, utilities.py, dateAndTime.py, DTC_GUI.py 
 #################################################################################
+
 import utilities as util
 import nightTime as nt
 import dateAndTime as dnt
 
+import csv
 from astropy.time import Time
-import sys
 import importlib as imp
+import matplotlib.pyplot as plt
 
 imp.reload(dnt)
 imp.reload(util)
@@ -87,6 +88,9 @@ thisMonth.numDaysInMonth = thisMonth.numberOfDaysInMonth(month)
 thisMonth.createDate()
 dates = thisMonth.dates
 
+monthName = thisMonth.getMonthName()
+filename = monthName + '_' + str(year) + '.csv'
+
 CH = [0.0] * thisMonth.numDaysInMonth
 dict = {}
 
@@ -98,6 +102,7 @@ while i < thisMonth.numDaysInMonth:
 
     dict[i].getAstroTimes()
     dict[i].getNauticalTimes()
+    dict[i].getNightLengths()
     dict[i].getMoonTimes()
 
     astroStart = dict[i].astroStart.ymdhms
@@ -105,7 +110,7 @@ while i < thisMonth.numDaysInMonth:
     moonStart = dict[i].moonRise.ymdhms
     moonEnd = dict[i].moonSet.ymdhms
    
-    print(dict[i].astroLength)
+    print(dict[i].date)
 
     dict[i].moonUp()
     
@@ -113,3 +118,10 @@ while i < thisMonth.numDaysInMonth:
 
     CH[i] = dict[i].chiaroscuro 
     i+=1
+
+#writer = csv.writer(open(filename, 'wb'))
+#writer.writerows(CH)
+plt.plot(CH)
+plt.show()
+
+

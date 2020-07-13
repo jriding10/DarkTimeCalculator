@@ -19,6 +19,24 @@ class Dates:
         self.numDaysLastMonth = 0
         self.dates = [0] * 31
 
+    def getMonthName(self):
+        monthNames = {
+            1: 'January',
+            2: 'February',
+            3: 'March',
+            4: 'April',
+            5: 'May',
+            6: 'June',
+            7: 'July',
+            8: 'August',
+            9: 'September',
+            10: 'October',
+            11: 'November',
+            12: 'December'
+        }
+
+        return monthNames[self.month]
+
     def numberOfDaysInMonth(self, month):
         thirty = [4, 6, 9, 11]
         thirtyOne = [1, 3, 5, 7, 8, 10, 12]
