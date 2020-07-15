@@ -45,8 +45,8 @@ class Dates:
         elif month in thirtyOne:
             numDaysThisMonth = 31
         else:       
-            if year % 4 == 0:
-                if year % 100 != 0 or year % 400 == 0:
+            if self.year % 4 == 0:
+                if self.year % 100 != 0 or self.year % 400 == 0:
                     numDaysThisMonth = 29
             else:
                 numDaysThisMonth = 28

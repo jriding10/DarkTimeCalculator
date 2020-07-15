@@ -13,6 +13,7 @@ import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 from astropy.time import Time
+from datetime import datetime, timedelta
 from astroplan import Observer
 from astropy.coordinates import EarthLocation
 
@@ -83,3 +84,79 @@ def createPlot(x, y, z):
     plt.plot(grey, 'k--')
     plt.plot(dark, 'k--')
     plt.show()
+
+def readableTimes(night):
+    delta = timedelta(hours=+10)
+    
+    astroStart = datetime.fromisoformat(night.astroStart.iso)
+    astroStart += delta
+    date = astroStart.isoformat()[0:10]
+    astroStartTime = astroStart.isoformat()[11:16]
+    astroEnd = datetime.fromisoformat(night.astroEnd.iso)
+    astroEnd += delta
+    astroEndTime = astroEnd.isoformat()[11:16]
+
+    nautStart = datetime.fromisoformat(night.nauticalStart.iso)
+    nautStart += delta
+    nautStartTime = nautStart.isoformat()[11:16] 
+    nautEnd = datetime.fromisoformat(night.nauticalEnd.iso)
+    nautEnd += delta
+    nautEndTime = nautEnd.isoformat()[11:16]
+
+    moonRise = datetime.fromisoformat(night.moonRise.iso)
+    moonRise += delta
+    moonRiseDate = moonRise.isoformat()[0:10]
+    moonRiseTime = moonRise.isoformat()[11:16]
+    if moonRiseDate != date:
+        moonRiseTime = '(' + moonRiseTime + ')'
+#    else:
+#        moonRiseTime = ' ' + moonRiseTime + ' '
+ 
+    moonSet = datetime.fromisoformat(night.moonSet.iso)
+    moonSet += delta
+    moonSetDate = moonSet.isoformat()[0:10]
+    moonSetTime = moonSet.isoformat()[11:16]
+    if moonSetDate != date:
+        moonSetTime = '(' + moonRiseTime + ')'
+    else:
+        moonRiseTime = ' ' + moonRiseTime + ' '
+
+    writeLine = date + '    '
+    writeLine += astroStartTime + '    ' + astroEndTime + '   '
+    writeLine += nautStartTime + '    ' + nautEndTime + '    '
+    writeLine += moonRiseTime + '    ' + moonSetTime + '    '
+    writeLine += str(round(night.chiaroscuro, 3)) + '    '
+    
+    return writeLine
+# Create a human readable table of rise and set times as well as CH
+def readableTableCH(night, filename):
+    numDays = len(night)
+    delta = timedelta(hours=+10)
+    filename += '.txt'
+    f = open(filename, 'a')    
+
+    i = 0
+    txt = '| Date       | AstroTwilight Start   End | NauticalTwilight Start End ' + '| Moon Rise Set |'
+    while i < numDays:
+        writeLine = readableTimes(night[i]) + '\n'
+        f.write(writeLine)
+        i+=1
+
+    f.close()
+
+def readableTableAll(night, firstHalf, secondHalf, filename):
+    numDays = len(night)
+    delta = timedelta(hours=+10)
+    filename += '_all.txt'
+    f = open(filename, 'a')
+
+    i = 0
+    while i < numDays:
+        writeLine = readableTimes(night[i])
+        writeLine += str(round(firstHalf[i].chiaroscuro, 3)) + '    '
+        writeLine += str(round(secondHalf[i].chiaroscuro, 3)) + '\n'
+        f.write(writeLine)
+        i+=1
+
+    f.close()
+        
