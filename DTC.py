@@ -210,8 +210,10 @@ filenameCSV = filename + '.csv'
 
 if numOutputs == 0:
     util.readableTableCH(night, filename)
-else:
-    util.readableTableAllCH(night, firstCH, secondCH, filename)
+
+# won't write for some reason
+#else:
+#    util.readableTableAllCH(night, firstCH, secondCH, filename)
 
 #with open(filenameCSV, 'a+') as output:
 #    wr = csv.writer(output, delimiter='\n')

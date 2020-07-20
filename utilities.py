@@ -109,6 +109,8 @@ def readableTimes(night):
     moonRiseTime = moonRise.isoformat()[11:16]
     if moonRiseDate != date:
         moonRiseTime = '(' + moonRiseTime + ')'
+    else: 
+        moonRiseTime = ' ' + moonRiseTime + ' ' 
 #    else:
 #        moonRiseTime = ' ' + moonRiseTime + ' '
  
@@ -117,9 +119,9 @@ def readableTimes(night):
     moonSetDate = moonSet.isoformat()[0:10]
     moonSetTime = moonSet.isoformat()[11:16]
     if moonSetDate != date:
-        moonSetTime = '(' + moonRiseTime + ')'
+        moonSetTime = '(' + moonSetTime + ')'
     else:
-        moonRiseTime = ' ' + moonRiseTime + ' '
+        moonRiseTime = ' ' + moonSetTime + '   '
 
     writeLine = date + '    '
     writeLine += astroStartTime + '    ' + astroEndTime + '   '
@@ -136,7 +138,15 @@ def readableTableCH(night, filename):
     f = open(filename, 'a')    
 
     i = 0
-    txt = '| Date       | AstroTwilight Start   End | NauticalTwilight Start End ' + '| Moon Rise Set |'
+
+    txt = '\n'
+    txt = txt + filename + '\n'
+    txt = txt + ' -----------------------------------------------------------------------------\n '
+    txt = txt + '      |       AstroTwilight |  NautTwilight  |          Moon        | \n'
+    txt = txt + ' Date |       Start     End |  Start     End |  ' + '   Rise        Set |   CH \n'
+    txt = txt + '-------------------------------------------------------------------------------\n'
+
+    f.write(txt)
     while i < numDays:
         writeLine = readableTimes(night[i]) + '\n'
         f.write(writeLine)
@@ -144,7 +154,7 @@ def readableTableCH(night, filename):
 
     f.close()
 
-def readableTableAll(night, firstHalf, secondHalf, filename):
+def readableTableAllCH(night, firstHalf, secondHalf, filename):
     numDays = len(night)
     delta = timedelta(hours=+10)
     filename += '_all.txt'
@@ -152,9 +162,13 @@ def readableTableAll(night, firstHalf, secondHalf, filename):
 
     i = 0
     while i < numDays:
+        CH1 = firstHalf[i].chiaroscuro
+        CH2 = secondHalf[i].chiaroscuro
         writeLine = readableTimes(night[i])
-        writeLine += str(round(firstHalf[i].chiaroscuro, 3)) + '    '
-        writeLine += str(round(secondHalf[i].chiaroscuro, 3)) + '\n'
+        print(writeLine)
+        print('\n' + str(round(CH1, 3)) + '\n')
+        writeLine += str(round(CH1, 3)) + '    '
+        writeLine += str(round(CH2, 3)) + '\n'
         f.write(writeLine)
         i+=1
 

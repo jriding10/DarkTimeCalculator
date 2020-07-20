@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sysy
+import sys
 from PyQt5.QWidgets import QApplication, QWidget
 
 class DTCGUI(self):
