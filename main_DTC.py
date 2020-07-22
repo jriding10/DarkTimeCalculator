@@ -110,11 +110,13 @@ class DTC_GUI(QDialog):
         calcButton = QPushButton('Calculate', self)
         calcButton.clicked.connect(self.clickMethod)
         
-        bLayout = QHBoxLayout()
-        bLayout.addWidget(quit)
-        bLayout.addWidget(calcButton)
-        calcButton.move(0, 100)
-        bLayout.addStretch(1)
+        bLLayout = QHBoxLayout()
+        bLLayout.addWidget(quit)
+        bLLayout.addStretch(1)
+        
+        bRLayout = QHBoxLayout()
+        bRLayout.addWidget(calcButton)
+        bRLayout.addStretch(1)
         
         self.midLeftGroup = QGroupBox()
         self.loadIERSA = QCheckBox('Update IERS_A file')
@@ -131,7 +133,8 @@ class DTC_GUI(QDialog):
         mainLayout.addWidget(self.topLeftGroup, 1, 0)
         mainLayout.addWidget(self.topRightGroup, 1, 1)
         mainLayout.addWidget(self.midLeftGroup, 2, 0)
-        mainLayout.addLayout(bLayout, 3, 0, 1, 2)
+        mainLayout.addLayout(bLLayout, 3, 0, 1, 2)
+        mainLayout.addLayout(bRLayout, 3, 1, 1, 2)
         self.setLayout(mainLayout)
             
     def clickMethod(self):
