@@ -23,6 +23,7 @@
 # 2020-07-13    JLR     Calculates CH to some accuracy. Also calculates CH for
 #                       the beginning and end halves of the night.
 # 2020-07-20    JLR     Began adding the GUI
+# 2020-07-27    JLR     GUI works, Code works, just not together
 
 # Module Versions:
 # python version 3.8
@@ -31,15 +32,18 @@
 
 # standard libraries
 import sys
-import calculator as calc
 import importlib as imp
 
+import nightTime as nt
+import dateAndTime as dnt
+import utilities as util
+
 # reload modules (for debugging purposes)
-#imp.reload(calc.calculator)
+#imp.reload(nt)
 
 # Widget libraries
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QVBoxLayout, QDialog, QLineEdit, QLabel, QComboBox, 
-                             QPushButton, QGridLayout, QMessageBox, QCheckBox, QGroupBox)
+                             QPushButton, QGridLayout, QMessageBox, QCheckBox, QGroupBox, QTableWidget, QTableWidgetItem)
 from PyQt5.QtCore import QSize 
 
 class DTC_GUI(QDialog):
@@ -168,8 +172,134 @@ class DTC_GUI(QDialog):
         #print("It is " + str(self.month) + " of " + str(self.year) + "\n")
         #print("Half nights is " + str(self.calculateHalfNights))
         
-        #if validYear:
-        #    calc.calculator(self.year, self.month, self.calculateHalfNights, self.saveCSV, self.saveTXT)
+        if validYear:
+            self.calculateCH()
+            
+    def calculateCH(self):
+        midday = ' 2:00:00'
+        midnight = ' 14:00:00'
+        aat = util.createLocation()
+        
+        
+        monthStart, monthEnd = util.monthStartEndPoints(self.month)
+        currentMonth = monthStart
+    
+# Initialise required dictionaries.
+        night = {}
+        tableVars = {}
+        if self.calculateHalfNights:
+            firstHalf = {}
+            secondHalf = {}
+
+#This while loop cycles through the months requested.
+        i = 0
+        while currentMonth >= monthStart and currentMonth <= monthEnd:
+# cover the fact semester B includes January of the next year
+            if self.month == 14:
+                if currentMonth == 13:
+                    currentMonth = 1
+                    self.year += 1
+# compute the dates for this month.
+            thisMonth = dnt.Dates(currentMonth, self.year)
+            thisMonth.numDaysInMonth = thisMonth.numberOfDaysInMonth(currentMonth)
+            thisMonth.createDate()
+            dates = thisMonth.dates
+        
+# This while loops over the days of the month and calculates CH
+            j = 0
+            while j < thisMonth.numDaysInMonth:
+                # Create time object
+                middayJD = util.convertJD(dates[j], midday)
+                midnightJD = util.convertJD(dates[j], midnight)
+                night[i] = nt.NightInfo(aat, dates[j], middayJD)
+                tableVars[i] = nt.CHvalues(self.year, self.month)
+
+# Calculate the various times to get CH
+                night[i].getAstroTimes()
+                night[i].getNauticalTimes()
+                night[i].getNightLengths()
+                night[i].getMoonTimes()
+                night[i].moonUp()
+                night[i].calculateChiaroscuro()
+            
+                tableVars[i].date = dates[j]
+                tableVars[i].CH = night[i].chiaroscuro
+        
+# Repeat of above for 1st half of the night. Set end times to midnight.
+                if self.calculateHalfNights:
+                    firstHalf[i] = nt.NightInfo(aat, dates[i], middayJD)
+                    firstHalf[i].getAstroTimes()
+                    firstHalf[i].getNauticalTimes()
+                    firstHalf[i].astroEnd = midnightJD
+                    firstHalf[i].nauticalEnd = midnightJD
+                    firstHalf[i].getNightLengths()
+                    firstHalf[i].getMoonTimes()
+                    firstHalf[i].moonUp()
+                    firstHalf[i].calculateChiaroscuro()
+                
+                    tableVars[i].firstCH = firstHalf[i].chiaroscuro
+
+# Repeat of above for 2nd half of the night. Set start times to midnight.
+                    secondHalf[i] = nt.NightInfo(aat, dates[i], middayJD)
+                    secondHalf[i].getAstroTimes()
+                    secondHalf[i].getNauticalTimes()
+                    secondHalf[i].astroStart = midnightJD
+                    secondHalf[i].nauticalStart = midnightJD
+                    secondHalf[i].getNightLengths()
+                    secondHalf[i].getMoonTimes()
+                    secondHalf[i].moonUp()
+                    secondHalf[i].calculateChiaroscuro()
+                        
+                    tableVars[i].secondCH = secondHalf[i].chiaroscuro
+    
+   
+            i+=1
+            j+=1
+            print(dates[i] + '   ' + str(night[i].chiaroscuro))
+            currentMonth+=1
+        
+            filename = calc.fileName()
+            if self.saveTXT:
+                tableVars.saveToTxtFile(filename, night)
+            if self.saveCSV:
+                tableVars.saveToCsvFile(filename, night)
+        
+#        def showCH(self):
+#            numRows = len(tableVars)
+#        
+#            self.chTable = QTableWidget()
+#            self.chTable.setRowCount(numRows+2)
+#            self.chTable.setColumnCount(3)
+#            self.chTable.setItem(0,0, QTableWidgetItem("Date"))
+#            self.chTable.setItem(0,1, QTableWidgetItem("CH"))
+#            self.chTable.setItem(0,2, QTableWidgetItem("Type"))
+            
+#            i = 1
+#            colour = "bright"
+#            while i < numRows:
+#                CH = tableVars[i].chiaroscuro
+#                self.chTable(i,0, QTableWidgetItem(tableVars[i].date))
+#                self.chTable(i,1, QTableWidgetItem(str(CH)))
+#                if CH > 0.65:
+#                    colour = "bright"
+#                elif CH > 0.35:
+#                    colour = "grey"
+#                else:
+#                    colour = "dark"
+#                self.chTable(i,2, QTableWidgetItem(colour))
+#                i+=1
+                
+#        exitButton = QPushButton('Quit', self)
+#        exitButton.clicked.connect(self.close)
+        
+#        layout = QHBoxLayout()
+#        layout.addWidget(self.chTable)
+#        layout.addStretch(1)
+#        layout.addWidget(exitButton)
+#        layout.addStretch(1)
+        
+#        self.show()
+            
             
 #    def createProgressBar(self):
 #        self.progressBar = QProgressBar()
@@ -189,23 +319,7 @@ if __name__ == "__main__":
     mainWin = DTC_GUI()
     mainWin.show()
     sys.exit(app.exec_())
-        
-        
-   
-    # create groups of widgets
-        #self.createTopLeftGroup()
-        #self.createMiddleLeftGroup()
-        #self.createBottomLeftGroup()
-        #self.createTopRightGroup()
-        #self.createMiddleRightGroup()
-        #self.createBottomRightGroup()
-        #self.createProgressBar()
-    
-    #def createTopLeftGroup(self):
-        #self.topLeftGroup = QGroupBox("Group 1")
-        #self.yearLine = QLineEdit()
-        #self.yearLabel = QLabel("Year:")
-        #self.yearLabel.setBuddy(yearLine)
+
         
 
         

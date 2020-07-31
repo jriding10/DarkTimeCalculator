@@ -16,6 +16,7 @@ from astropy.time import Time
 from datetime import datetime, timedelta
 from astroplan import Observer
 from astropy.coordinates import EarthLocation
+import csv
 
 def createObservatory(longitude, latitude, altitude):
     location = EarthLocation.from_geodetic(longitude*u.deg, latitude*u.deg, altitude*u.m)
@@ -84,6 +85,44 @@ def createPlot(x, y, z):
     plt.plot(grey, 'k--')
     plt.plot(dark, 'k--')
     plt.show()
+
+def createLocation():
+    siteName = "Anglo-Australian Observatory"
+    aat = createObservatory2(siteName)
+    return aat
+    
+def monthStartEndPoints(month):
+    if month == 13:
+        monthStart = 2
+        monthEnd = 7
+    elif month == 14:
+        monthStart = 8
+        monthEnd = 13
+    else:
+        monthStart = month
+        monthEnd = month
+    return monthStart, monthEnd
+
+def fileName(month):
+    if month == 13:
+        monthName = 'SemesterA'
+    elif month == 14:
+        monthName = 'SemesterB'
+    else:
+        monthName = thisMonth.getMonthName()
+    
+    filename = monthName + '_' + str(year)
+    return filename
+    
+def saveToTxtFile(filename, night):
+    filenameTXT = filename + '.txt'
+    readableTableCH(night, filename)
+
+def saveToCsvFile(filename, CH):
+    filename = filename + '.csv'
+    with open(filenameCSV, 'a+') as output:
+        wr = csv.writer(output, delimiter='\n')
+        wr.writerows([CH])
 
 def readableTimes(night):
     delta = timedelta(hours=+10)

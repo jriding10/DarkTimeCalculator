@@ -117,7 +117,16 @@ class NightInfo:
             print("CH is too large again!")
         if self.chiaroscuro < 0.0:
             self.chiaroscuro = 0.0
-            print("CH is too small!")        
+            print("CH is too small!") 
+            
+class CHvalues:
+    def __init__(self, year, month):
+        self.year = year
+        self.month = month
+        self.CH = 0.0
+        self.firstCH = 0.0
+        self.secondCH = 0.0
+        self.date = ""
 
 #class FirstHalf(NightInfo):
 #    def __init__(self, obs, date, jDate):
